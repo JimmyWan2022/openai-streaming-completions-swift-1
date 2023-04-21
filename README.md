@@ -52,3 +52,6 @@ Task {
 ## Calling other text APIs
 
 See [OpenAIAPI+TextCompletion.swift](https://github.com/nate-parrott/openai-streaming-completions-swift/blob/main/Sources/OpenAIStreamingCompletions/OpenAI%2BTextCompletion.swift)
+
+## 编译新版本
+swift build -c release
