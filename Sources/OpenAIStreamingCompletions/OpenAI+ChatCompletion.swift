@@ -87,7 +87,35 @@ extension OpenAIAPI {
             src.connect()
         }
     }
+    public func completeChatStreaming(_ completionRequest: ChatCompletionRequest,apiUrl:String) throws -> AsyncStream<Message> {
+        var cr = completionRequest
+        cr.stream = true
+        let request = try createChatRequest(completionRequest: cr,apiUrl:apiUrl)
 
+        return AsyncStream { continuation in
+            let src = EventSource(urlRequest: request)
+
+            var message = Message(role: .assistant, content: "")
+
+            src.onComplete { statusCode, reconnect, error in
+                continuation.finish()
+            }
+            src.onMessage { id, event, data in
+                guard let data, data != "[DONE]" else { return }
+                do {
+                    let decoded = try JSONDecoder().decode(ChatCompletionStreamingResponse.self, from: Data(data.utf8))
+                    if let delta = decoded.choices.first?.delta {
+                        message.role = delta.role ?? message.role
+                        message.content += delta.content ?? ""
+                        continuation.yield(message)
+                    }
+                } catch {
+                    print("Chat completion error: \(error)")
+                }
+            }
+            src.connect()
+        }
+    }
     public func completeChatStreamingWithObservableObject(_ completionRequest: ChatCompletionRequest) throws -> StreamingCompletion {
         let completion = StreamingCompletion()
         Task {
@@ -129,6 +157,19 @@ extension OpenAIAPI {
     
     private func createChatRequest(completionRequest: ChatCompletionRequest) throws -> URLRequest {
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let orgId {
+            request.setValue(orgId, forHTTPHeaderField: "OpenAI-Organization")
+        }
+        request.httpBody = try JSONEncoder().encode(completionRequest)
+        return request
+    }
+    private func createChatRequest(completionRequest: ChatCompletionRequest,apiUrl:String) throws -> URLRequest {
+//      let url = URL(string: "https://api.openai.com/v1/chat/completions")!
+        let url = URL(string: apiUrl)!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
