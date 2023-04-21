@@ -87,6 +87,7 @@ extension OpenAIAPI {
             src.connect()
         }
     }
+    // MARK: - Streaming completion add url string "https://api.openai.com/v1/chat/completions"
     public func completeChatStreaming(_ completionRequest: ChatCompletionRequest,apiUrl:String) throws -> AsyncStream<Message> {
         var cr = completionRequest
         cr.stream = true
