@@ -51,7 +51,7 @@ extension OpenAIAzure {
     }
 
     public func completeChat(_ completionRequest: ChatCompletionRequest) async throws -> String {
-        let request = try createChatRequest(completionRequest: completionRequest)
+        let request = try createChatRequestAzure(completionRequest: completionRequest,ip: "localhost",port: "9091")
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw Errors.invalidResponse(String(data: data, encoding: .utf8) ?? "<failed to decode response>")
@@ -68,7 +68,7 @@ extension OpenAIAzure {
     public func completeChatStreaming(_ completionRequest: ChatCompletionRequest) throws -> AsyncStream<Message> {
         var cr = completionRequest
         cr.stream = true
-        let request = try createChatRequest(completionRequest: cr)
+        let request = try createChatRequestAzure(completionRequest: cr,ip: "localhost",port: "9091")
 
         return AsyncStream { continuation in
             let src = EventSource(urlRequest: request)
@@ -100,7 +100,7 @@ extension OpenAIAzure {
     public func completeChatStreaming(_ completionRequest: ChatCompletionRequest,apiUrl:String) throws -> AsyncStream<Message> {
         var cr = completionRequest
         cr.stream = true
-        let request = try createChatRequest(completionRequest: cr,apiUrl:apiUrl)
+        let request = try createChatRequestAzure(completionRequest: cr,ip: "localhost",port: "9091")
 
         return AsyncStream { continuation in
             let src = EventSource(urlRequest: request)
@@ -165,29 +165,21 @@ extension OpenAIAzure {
         return json.choices.first?.delta.content
     }
     // http://localhost:9091/api/v1/azureopenai/chat/completions
-    private func createChatRequest(completionRequest: ChatCompletionRequest) throws -> URLRequest {
+    private func createChatRequestAzure(completionRequest: ChatCompletionRequest,ip:String,port:String) throws -> URLRequest {
 //        let url = URL(string: "https://api.openai.com/v1/chat/completions")!
-        let url = URL(string: "http://localhost:9091/api/v1/azureopenai/chat/completions")!
+        let url = URL(string: "http://"+ip+":"+port+"/api/v1/azureopenai/chat/completions")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-//        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        if let orgId {
-//            request.setValue(orgId, forHTTPHeaderField: "OpenAI-Organization")
-//        }
         request.httpBody = try JSONEncoder().encode(completionRequest)
         return request
     }
-    private func createChatRequest(completionRequest: ChatCompletionRequest,apiUrl:String) throws -> URLRequest {
+    private func createChatRequestAzure(completionRequest: ChatCompletionRequest,apiUrl:String) throws -> URLRequest {
 //      let url = URL(string: "https://api.openai.com/v1/chat/completions")!
         let url = URL(string: apiUrl)!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-//        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        if let orgId {
-//            request.setValue(orgId, forHTTPHeaderField: "OpenAI-Organization")
-//        }
         request.httpBody = try JSONEncoder().encode(completionRequest)
         return request
     }
