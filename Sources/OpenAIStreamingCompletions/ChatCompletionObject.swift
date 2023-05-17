@@ -24,7 +24,7 @@ public struct ChatCompletionRequest: Codable {
     }
 }
 
-struct ChatCompletionResponse: Codable {
+public struct ChatCompletionResponse: Codable {
     struct Choice: Codable {
         var message: Message
     }
