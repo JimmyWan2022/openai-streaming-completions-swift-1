@@ -98,7 +98,6 @@ extension OpenAIAzure {
 
                     if let delta = decoded.choices.first?.delta {
                         // 获取当前消息的角色
-//                        let role = message.role
                         if let deltaRole = decoded.choices.first?.delta.role,
                                 let localRole = Message.convertStringToRole(deltaRole.rawValue) {
                         message.role = localRole
@@ -110,30 +109,16 @@ extension OpenAIAzure {
                             content += deltaContent
                             message.content = content
                         }
-                      
-                        // 创建新的消息
-//                        message = Message(role: role, content: content)
                         // 发送新的消息给下一个接收器
                         continuation.yield(message)
                     }
-                } catch {
+                }catch {
                     print("Chat completion error: \(error)")
                 }
             }
             src.connect()
         }
     }
-    //                        if let deltaContent = decoded.choices.first?.delta.content {
-    //                            message.content = deltaContent
-    //                        } else if let deltaRole = decoded.choices.first?.delta.role,
-    //                                    let localRole = Message.convertStringToRole(deltaRole.rawValue) {
-    //                            message.role = localRole
-    //                        }
-    //                        if let localContent: String? = delta.content,
-    //                            let content = localContent,
-    //                            !content.isEmpty {
-    //                            message.content += content
-    //                        }
     // MARK: - Streaming completion add url string "https://api.openai.com/v1/chat/completions"
 
     // http://localhost:9091/api/v1/azureopenai/chat/completions
@@ -158,7 +143,6 @@ extension OpenAIAzure {
 
                     if let delta = decoded.choices.first?.delta {
                         // 获取当前消息的角色
-//                        let role = message.role
                         if let deltaRole = decoded.choices.first?.delta.role,
                                 let localRole = Message.convertStringToRole(deltaRole.rawValue) {
                         message.role = localRole
@@ -170,44 +154,10 @@ extension OpenAIAzure {
                             content += deltaContent
                             message.content = content
                         }
-                      
-                        // 创建新的消息
-//                        message = Message(role: role, content: content)
                         // 发送新的消息给下一个接收器
                         continuation.yield(message)
                     }
-                }
-//                do {
-//                    print("Data: \(data)")
-//                    let decoded = try JSONDecoder().decode(ChatCompletionStreamingResponse.self, from: Data(data.utf8))
-//                    if let delta = decoded.choices.first?.delta {
-//
-////                        if let localRole = Message.convertStringToRole(delta.role.rawValue){
-////                            message.role = localRole ?? message.role
-////                        }
-//                        if let deltaContent = decoded.choices.first?.delta.content {
-//                            message.content = deltaContent
-//                        } else if let deltaRole = decoded.choices.first?.delta.role,
-//                                    let localRole = Message.convertStringToRole(deltaRole.rawValue) {
-//                            message.role = localRole
-//                        }
-//
-////                        if let deltaRole = delta.role, let localRole = Message.convertStringToRole(deltaRole.rawValue) {
-////
-////                                message.role = localRole
-////
-////                        }
-//
-//                        if let localContent: String? = delta.content,
-//                            let content = localContent,
-//                            !content.isEmpty {
-//                            message.content += content
-//                        }
-//
-//                        continuation.yield(message)
-//                    }
-//                }
-                catch {
+                }catch {
                     print("Chat completion error: \(error)")
                 }
             }
@@ -234,17 +184,6 @@ extension OpenAIAzure {
         }
         return completion
     }
-
-//    private struct ChatCompletionStreamingResponse: Codable {
-//        struct Choice: Codable {
-//            struct MessageDelta: Codable {
-//                var role: Message.Role?
-//                var content: String?
-//            }
-//            var delta: MessageDelta
-//        }
-//        var choices: [Choice]
-//    }
 
     struct ChatCompletionStreamingResponse: Codable {
         let id: String
