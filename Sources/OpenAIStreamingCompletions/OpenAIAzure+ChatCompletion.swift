@@ -97,7 +97,10 @@ extension OpenAIAzure {
                     let decoded = try JSONDecoder().decode(ChatCompletionStreamingResponse.self, from: Data(data.utf8))
                     if let delta = decoded.choices.first?.delta {
 //                        message.role = Message.convertStringToRole (delta.role) ?? message.role
-                        message.role = Message.convertStringToRole(delta.role.rawValue) ?? message.role
+                        if let localRole = Message.convertStringToRole(delta.role.rawValue){
+                            message.role = localRole ?? message.role
+                        }
+                       
                         message.content += delta.content ?? ""
                         continuation.yield(message)
                     }
@@ -131,7 +134,10 @@ extension OpenAIAzure {
                     let decoded = try JSONDecoder().decode(ChatCompletionStreamingResponse.self, from: Data(data.utf8))
                     if let delta = decoded.choices.first?.delta {
 //                        message.role = delta.role.rawValue ?? message.role.rawValue
-                        message.role = Message.convertStringToRole(delta.role.rawValue) ?? message.role
+//                        message.role = Message.convertStringToRole(delta.role.rawValue) ?? message.role
+                        if let localRole = Message.convertStringToRole(delta.role.rawValue){
+                            message.role = localRole ?? message.role
+                        }
                         message.content += delta.content ?? ""
                         continuation.yield(message)
                     }
@@ -188,14 +194,14 @@ extension OpenAIAzure {
             let delta: MessageDelta
             
             struct MessageDelta: Codable {
-                let role: Role
+                let role: Message.Role
                 let content: String
             }
-            public enum Role: String, Equatable, Codable, Hashable {
-                case system
-                case user
-                case assistant
-            }
+//            public enum Role: String, Equatable, Codable, Hashable {
+//                case system
+//                case user
+//                case assistant
+//            }
         }
     }
     
