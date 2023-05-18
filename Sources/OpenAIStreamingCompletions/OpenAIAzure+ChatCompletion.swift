@@ -22,7 +22,18 @@ extension OpenAIAzure {
             self.role = role
             self.content = content
         }
-        
+       public static func convertStringToRole(_ string: String) -> Message.Role? {
+            switch string {
+            case "system":
+                return .system
+            case "user":
+                return .user
+            case "assistant":
+                return .assistant
+            default:
+                return nil
+            }
+        }
     }
 
     public struct ChatCompletionRequest: Codable {
@@ -74,7 +85,7 @@ extension OpenAIAzure {
         return AsyncStream { continuation in
             let src = EventSource(urlRequest: request)
 
-            var message = Message(role: .assistant, content: "")
+            var message:OpenAIAzure.Message = Message(role: .assistant, content: "")
 
             src.onComplete { statusCode, reconnect, error in
                 continuation.finish()
@@ -85,7 +96,8 @@ extension OpenAIAzure {
                     print("Data: \(data)")
                     let decoded = try JSONDecoder().decode(ChatCompletionStreamingResponse.self, from: Data(data.utf8))
                     if let delta = decoded.choices.first?.delta {
-                        message.role = delta.role ?? message.role
+//                        message.role = Message.convertStringToRole (delta.role) ?? message.role
+                        message.role = Message.convertStringToRole(delta.role.rawValue) ?? message.role
                         message.content += delta.content ?? ""
                         continuation.yield(message)
                     }
@@ -118,7 +130,8 @@ extension OpenAIAzure {
                     print("Data: \(data)")
                     let decoded = try JSONDecoder().decode(ChatCompletionStreamingResponse.self, from: Data(data.utf8))
                     if let delta = decoded.choices.first?.delta {
-                        message.role = delta.role ?? message.role
+//                        message.role = delta.role.rawValue ?? message.role.rawValue
+                        message.role = Message.convertStringToRole(delta.role.rawValue) ?? message.role
                         message.content += delta.content ?? ""
                         continuation.yield(message)
                     }
@@ -175,8 +188,13 @@ extension OpenAIAzure {
             let delta: MessageDelta
             
             struct MessageDelta: Codable {
-                let role: Message.Role?
-                let content: String?
+                let role: Role
+                let content: String
+            }
+            public enum Role: String, Equatable, Codable, Hashable {
+                case system
+                case user
+                case assistant
             }
         }
     }
