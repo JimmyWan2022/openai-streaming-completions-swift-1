@@ -97,11 +97,21 @@ extension OpenAIAzure {
                     let decoded = try JSONDecoder().decode(ChatCompletionStreamingResponse.self, from: Data(data.utf8))
                     if let delta = decoded.choices.first?.delta {
 //                        message.role = Message.convertStringToRole (delta.role) ?? message.role
-                        if let localRole = Message.convertStringToRole(delta.role.rawValue){
-                            message.role = localRole ?? message.role
+//                        if let localRole = Message.convertStringToRole(delta.role.rawValue){
+//                            message.role = localRole ?? message.role
+//                        }
+                        if let deltaContent = decoded.choices.first?.delta.content {
+                            message.content = deltaContent
+                        } else if let deltaRole = decoded.choices.first?.delta.role,
+                                    let localRole = Message.convertStringToRole(deltaRole.rawValue) {
+                            message.role = localRole
+                        }
+                        if let localContent: String? = delta.content,
+                            let content = localContent,
+                            !content.isEmpty {
+                            message.content += content
                         }
                        
-                        message.content += delta.content ?? ""
                         continuation.yield(message)
                     }
                 } catch {
@@ -133,12 +143,29 @@ extension OpenAIAzure {
                     print("Data: \(data)")
                     let decoded = try JSONDecoder().decode(ChatCompletionStreamingResponse.self, from: Data(data.utf8))
                     if let delta = decoded.choices.first?.delta {
-//                        message.role = delta.role.rawValue ?? message.role.rawValue
-//                        message.role = Message.convertStringToRole(delta.role.rawValue) ?? message.role
-                        if let localRole = Message.convertStringToRole(delta.role.rawValue){
-                            message.role = localRole ?? message.role
+
+//                        if let localRole = Message.convertStringToRole(delta.role.rawValue){
+//                            message.role = localRole ?? message.role
+//                        }
+                        if let deltaContent = decoded.choices.first?.delta.content {
+                            message.content = deltaContent
+                        } else if let deltaRole = decoded.choices.first?.delta.role,
+                                    let localRole = Message.convertStringToRole(deltaRole.rawValue) {
+                            message.role = localRole
                         }
-                        message.content += delta.content ?? ""
+                        
+//                        if let deltaRole = delta.role, let localRole = Message.convertStringToRole(deltaRole.rawValue) {
+//
+//                                message.role = localRole
+//
+//                        }
+                        
+                        if let localContent: String? = delta.content,
+                            let content = localContent,
+                            !content.isEmpty {
+                            message.content += content
+                        }
+                       
                         continuation.yield(message)
                     }
                 } catch {
