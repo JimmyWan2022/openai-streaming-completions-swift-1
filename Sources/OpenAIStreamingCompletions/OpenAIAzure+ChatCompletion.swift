@@ -22,6 +22,7 @@ extension OpenAIAzure {
             self.role = role
             self.content = content
         }
+        
     }
 
     public struct ChatCompletionRequest: Codable {
@@ -147,17 +148,37 @@ extension OpenAIAzure {
         return completion
     }
 
-    private struct ChatCompletionStreamingResponse: Codable {
-        struct Choice: Codable {
-            struct MessageDelta: Codable {
-                var role: Message.Role?
-                var content: String?
-            }
-            var delta: MessageDelta
-        }
-        var choices: [Choice]
-    }
+//    private struct ChatCompletionStreamingResponse: Codable {
+//        struct Choice: Codable {
+//            struct MessageDelta: Codable {
+//                var role: Message.Role?
+//                var content: String?
+//            }
+//            var delta: MessageDelta
+//        }
+//        var choices: [Choice]
+//    }
 
+    struct ChatCompletionStreamingResponse: Codable {
+        let id: String
+        let object: String
+        let created: Double
+        let model: String
+        let choices: [Choice]
+        let usage: String?
+        
+        struct Choice: Codable {
+            let index: Int
+            let finish_reason: String?
+            let delta: MessageDelta
+            
+            struct MessageDelta: Codable {
+                let role: Message.Role?
+                let content: String?
+            }
+        }
+    }
+    
     private func decodeChatStreamingResponse(jsonStr: String) -> String? {
         guard let json = try? JSONDecoder().decode(ChatCompletionStreamingResponse.self, from: Data(jsonStr.utf8)) else {
             return nil

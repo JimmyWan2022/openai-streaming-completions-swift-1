@@ -15,7 +15,11 @@ extension OpenAIAPI {
             self.role = role
             self.content = content
         }
+  
+       
+       
     }
+    
 
     public struct ChatCompletionRequest: Codable {
         var messages: [Message]
