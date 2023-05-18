@@ -115,6 +115,7 @@ extension OpenAIAzure {
             src.onMessage { id, event, data in
                 guard let data, data != "[DONE]" else { return }
                 do {
+                    print("Data: \(data)")
                     let decoded = try JSONDecoder().decode(ChatCompletionStreamingResponse.self, from: Data(data.utf8))
                     if let delta = decoded.choices.first?.delta {
                         message.role = delta.role ?? message.role
