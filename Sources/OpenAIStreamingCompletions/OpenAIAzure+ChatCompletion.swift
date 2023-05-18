@@ -260,14 +260,9 @@ extension OpenAIAzure {
             let delta: MessageDelta
             
             struct MessageDelta: Codable {
-                let role: Message.Role
-                let content: String
+                let role: Message.Role?
+                let content: String?
             }
-//            public enum Role: String, Equatable, Codable, Hashable {
-//                case system
-//                case user
-//                case assistant
-//            }
         }
     }
     
